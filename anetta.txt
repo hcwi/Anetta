@@ -1,0 +1,9 @@
+W załączniku plik. MP to jest jedna populacja MPS to druga.
+Chodzi o zbadanie kontrastów w każdej populacji osobno dla:
+1. r - w
+2. 2 - 6
+3. r6 - w6
+4. r2 - r6
+5. w2 - w6
+6. r2 - w2
+7. wielozmienna korelacje?
