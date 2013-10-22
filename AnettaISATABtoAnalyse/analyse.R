@@ -5,7 +5,7 @@ run <- function() {
   print("[debug] run")
   
   d0 <- read.table("data.txt", header=T)
-  d0.names <- grep(names(d), pattern="(Characteristics)|(Trait.Value.)", val=T)
+  d0.names <- grep(names(d0), pattern="(Characteristics)|(Trait.Value.)", val=T)
   d <- d0[d0.names]
   t.names <- grep(names(d), pattern="Trait.Value.", val=T)
   for (t in t.names) {

@@ -1,0 +1,629 @@
+   1  "Wykres œrednich i ANOVA dla danych MP-MPS"
+   2  job
+   3  import 'debug5.txt';col=!t('trait#','pop!','line!','row!','shape!','rep!');is=names
+
+Loading Spreadsheet File
+------------------------
+
+Catalogue of file C:\DOCUME~1\PKRA\USTAWI~1\TEMP\GENSTAT\G151D122692.GWB
+
+Sheet Title: Sheet1
+Description: <none>
+
+Sheet Type: vector
+  Index            Type    Nval   Name
+      1         variate     750   trait
+      2          factor     750   pop
+      3          factor     750   line
+      4          factor     750   row
+      5          factor     750   shape
+      6          factor     750   rep
+
+   4
+   5  restrict names[]
+   6  tabulate [class=line] trait;mean=mlines;se=selines
+   7  print mlines,selines
+
+                   mlines     selines
+         line
+       MARESI       419.7        8.69
+       MP 104       522.3        5.49
+       MP 105       505.3       10.04
+       MP 107      1108.3       84.82
+       MP 110       453.0       25.12
+       MP 112       488.7       13.38
+       MP 113      1078.7        4.18
+       MP 115       505.7        4.10
+       MP 118       479.0       14.22
+       MP 119       944.0       80.50
+       MP 123       485.0       17.52
+       MP 125      1105.0       18.01
+       MP 127      1317.0       30.05
+       MP 129      1151.0        5.13
+       MP 132      1010.0       77.39
+       MP 144       484.3       16.33
+       MP 147       470.3        9.40
+        MP 19       456.0        7.81
+         MP 2      1007.7       69.99
+        MP 21      1122.7       77.75
+        MP 22       515.3        6.12
+        MP 27      1212.3       68.34
+        MP 30       503.7        8.65
+        MP 32      1123.7       44.87
+        MP 33      1041.7       55.44
+        MP 39       465.0       16.09
+        MP 40       814.3       60.80
+        MP 49       446.0       14.19
+        MP 50      1320.3       29.90
+       MP 501       434.3        9.35
+       MP 502      1219.3       52.78
+       MP 503       507.3       15.06
+       MP 504      1242.3       47.24
+       MP 505      1080.3       57.17
+       MP 508       497.7        1.20
+       MP 509      1206.7       11.05
+        MP 51      1168.7       64.45
+       MP 510       427.0        8.96
+       MP 512      1134.7       45.31
+       MP 514       911.0        8.96
+       MP 519      1134.0      108.91
+        MP 52       442.3       22.24
+       MP 521      1075.0       38.19
+       MP 522      1286.3       17.19
+       MP 523       475.0       12.29
+        MP 53      1353.3       33.53
+        MP 55      1229.7       82.03
+        MP 56       473.0       35.53
+        MP 68      1019.7       48.79
+         MP 7       433.3        5.24
+        MP 79      1221.7       23.48
+        MP 80      1102.7       23.41
+        MP 84      1231.0       60.89
+        MP 85      1274.0       27.47
+        MP 89      1177.0       59.34
+         MP 9       409.3       19.34
+        MP 91       949.0       45.61
+        MP 98       489.0       16.92
+        MPS 1      1052.7       52.26
+       MPS 10      1228.0       72.03
+      MPS 100      1081.0       29.21
+      MPS 101       480.3       10.65
+      MPS 102       342.7       21.05
+      MPS 103       487.3        9.61
+      MPS 104       381.7        2.91
+      MPS 105      1099.7       55.34
+      MPS 106       458.7       19.94
+      MPS 107       552.7        3.71
+      MPS 108      1115.0       93.50
+      MPS 109       487.3        6.57
+       MPS 11       582.7        7.13
+      MPS 110      1312.3       64.70
+      MPS 111       875.7       38.44
+      MPS 112       521.3        2.60
+      MPS 113       467.3       33.74
+      MPS 114      1215.7       28.79
+      MPS 115       430.3        0.88
+      MPS 116       523.3        6.64
+      MPS 117      1117.3       57.78
+      MPS 118      1096.3       55.05
+      MPS 119       398.0       58.40
+      MPS 120       527.7        1.45
+      MPS 121      1201.7       53.09
+      MPS 122       451.0       10.79
+      MPS 123       482.3        8.37
+      MPS 124      1205.7       53.53
+      MPS 125       525.7        0.88
+      MPS 126       444.0        1.73
+      MPS 127       507.0       14.73
+      MPS 128       514.0       11.93
+      MPS 129       986.0       34.59
+       MPS 13       489.3        1.20
+      MPS 130      1110.3       39.54
+      MPS 131      1195.0       20.55
+      MPS 132       485.3       35.22
+      MPS 133      1022.3       62.07
+      MPS 134      1115.3       50.51
+      MPS 135      1120.3       92.81
+      MPS 136      1209.7       22.28
+      MPS 140       445.3        4.67
+      MPS 141      1108.3       15.90
+      MPS 142      1201.3       32.54
+      MPS 143      1013.3       14.53
+      MPS 144       512.7        8.99
+      MPS 145      1163.3        5.24
+      MPS 146      1099.0       10.44
+      MPS 147      1234.7       60.27
+      MPS 148       516.7        1.67
+      MPS 149      1174.0       74.45
+       MPS 15       487.3       13.02
+      MPS 150       434.3       13.96
+      MPS 151       387.7       12.45
+      MPS 152       446.7       15.90
+      MPS 153       969.3       40.19
+      MPS 154       494.3       17.13
+      MPS 156      1029.3      101.15
+      MPS 157      1034.3       68.37
+      MPS 158      1006.7       38.70
+       MPS 16       480.3       15.59
+      MPS 160      1189.7       82.89
+      MPS 161      1181.3       36.80
+      MPS 162       908.7      112.82
+      MPS 163       966.3       28.83
+      MPS 164      1016.7       43.44
+      MPS 165       467.3       16.70
+      MPS 166       475.7       21.14
+      MPS 167       446.3       33.65
+      MPS 168       506.7       10.17
+      MPS 169       444.3       30.33
+       MPS 17       531.7       45.12
+      MPS 170       423.3       29.38
+      MPS 171      1136.0       56.30
+      MPS 172       369.3       15.30
+      MPS 173      1046.3       34.67
+      MPS 174       453.0        2.65
+      MPS 176       924.7      138.09
+      MPS 177       984.3       86.42
+      MPS 178       489.7        4.10
+      MPS 179      1156.7       59.09
+       MPS 18       477.7       31.12
+      MPS 180       479.0       44.61
+      MPS 181       407.3       75.70
+      MPS 182       448.0        1.53
+      MPS 183       519.3       15.62
+      MPS 184       451.3        4.10
+      MPS 185       364.0       10.41
+      MPS 186      1186.3       56.48
+      MPS 187       958.7       29.59
+      MPS 188      1360.7       16.19
+      MPS 189      1073.7       36.36
+       MPS 19      1063.3       66.46
+      MPS 190      1009.3       58.17
+      MPS 191      1134.0      112.99
+      MPS 193       964.3        5.61
+      MPS 194      1125.0      104.58
+      MPS 195      1269.0       17.78
+      MPS 196       462.0       37.32
+      MPS 197       957.0       48.50
+      MPS 198      1055.3       96.19
+      MPS 199      1130.3        4.63
+        MPS 2       426.7        2.40
+       MPS 20       974.0      108.68
+      MPS 200       474.7       15.30
+      MPS 201       583.0       40.41
+      MPS 202       381.0       25.97
+      MPS 203      1143.3       75.81
+      MPS 204       478.0        5.69
+      MPS 205      1144.7       71.17
+      MPS 206      1036.7       12.67
+      MPS 207      1051.3       71.94
+       MPS 21       516.7       11.67
+       MPS 23       462.3        4.63
+       MPS 24      1277.0        6.08
+       MPS 25      1174.7       33.55
+       MPS 26       432.7        7.31
+       MPS 27       456.7        9.60
+       MPS 28      1108.0      104.09
+        MPS 3      1135.7       30.53
+       MPS 30       517.0       54.51
+       MPS 31       424.3       23.47
+       MPS 32       494.7        1.45
+       MPS 33       493.7        4.67
+       MPS 34       427.3        1.76
+       MPS 35      1111.0       50.65
+       MPS 36       478.3       11.55
+       MPS 37       435.7        6.64
+       MPS 38      1303.0       22.65
+       MPS 39      1166.3       38.12
+       MPS 40       472.7       12.47
+       MPS 42       492.7        7.22
+       MPS 44       394.3       30.69
+       MPS 45       479.3        7.26
+       MPS 46       324.0        4.36
+       MPS 47       466.0        8.14
+       MPS 48      1153.0       51.01
+       MPS 49      1239.0       44.61
+        MPS 5       466.0       38.55
+       MPS 50      1124.3      107.41
+       MPS 51       496.7        9.02
+       MPS 52       957.3       19.47
+       MPS 53       500.7       17.74
+       MPS 54       546.0       10.21
+       MPS 55       380.0        5.77
+       MPS 56       403.7        9.91
+       MPS 57       517.7        8.65
+       MPS 58       426.3        8.17
+       MPS 59       435.7       23.25
+        MPS 6       349.3        9.56
+       MPS 60      1261.3       62.50
+       MPS 61      1177.0       54.93
+       MPS 62       502.7        4.91
+       MPS 63      1167.3       42.06
+       MPS 64      1065.7       29.18
+       MPS 65       477.3        9.13
+       MPS 66       385.7        9.96
+       MPS 67       453.3        4.81
+       MPS 68       496.0        7.00
+       MPS 69      1205.0       74.23
+        MPS 7       508.3       10.74
+       MPS 70      1242.3       90.56
+       MPS 71      1015.3       83.83
+       MPS 72      1170.7       30.33
+       MPS 73      1003.0      131.23
+       MPS 74      1123.3       69.03
+       MPS 75      1134.7       18.89
+       MPS 76      1180.0       35.64
+       MPS 77      1224.3        9.77
+       MPS 78      1233.0       89.52
+       MPS 79       999.3       19.36
+        MPS 8       518.3       29.24
+       MPS 80      1107.7       23.40
+       MPS 81      1174.7       69.48
+       MPS 82      1206.0       33.50
+       MPS 83      1343.3       25.10
+       MPS 84      1162.7      108.88
+       MPS 86       485.7        7.26
+       MPS 87      1219.7       81.96
+       MPS 88      1133.0       60.08
+       MPS 89       523.7        5.24
+        MPS 9       482.7       10.27
+       MPS 90       482.0       20.21
+       MPS 91      1093.0        9.54
+       MPS 92      1136.3       23.47
+       MPS 93      1185.3       93.11
+       MPS 95      1099.0       26.00
+       MPS 96      1249.7       27.27
+       MPS 97      1274.3       49.02
+       MPS 98      1060.7       25.67
+       MPS 99       439.3       28.01
+         POMO      1298.7       20.34
+
+
+   8  export [out='srednie.xls'] mlines,selines
+* MESSAGE: Deleting old version of srednie.xls
+EXPORT: table written to srednie.xls
+   9
+  10  "Dla rodzicow"
+  11  subset [cond=pop.in.!(1,4); setlev=y] names[];atrait,apop,aline,arow,ashape,arep
+  12  tabulate [class=apop] atrait;nobs = tt;mean=mean;se=se
+  13  print tt,mean,se
+
+                       tt        mean          se
+         apop
+       MARESI           3       419.7        8.69
+         POMO           3      1298.7       20.34
+
+
+  14  calc see=2*se
+  15  dtable [meth=bar] mean;bar=see
+  16
+  17  "yaxis 1;upp=1300"
+  18
+  19  "Dla linii MP i MPS"
+  20  subset [cond=pop.in.!(2,3); setlev=y] names[]
+
+
+******** Warning 4, code VA 19, statement 56 in procedure SUBSET
+
+Command:  FACTOR [NVALUES=NSubset; LEVELS=!(#NewLevs); LABELS=!t(#NewLabs); VALUES=#NSubset(*); REFERENCELEVEL=RefLev; MODIFY=yes] NEWVECTOR[J]; DECIMALS=#Dec
+Inconsistent structure(s).
+
+
+***** line
+***** Having been redefined, the following structure(s) were found to be inconsistent:
+***** mlines  selines
+*****
+and they have been destroyed.
+
+  21  tabulate [class=pop,row,shape] trait;nobs = tt2;mean=mean2;se=se2
+  22  print tt2,mean2,se2
+
+                     shape           r                                   w
+                                   tt2       mean2         se2         tt2       mean2         se2
+          pop          row
+           MP            2          42       466.7        5.79          36       579.8       38.54
+                         6          54      1105.5       17.17          39      1180.8       24.99
+          MPS            2          99       461.9        6.24         183       481.1        8.37
+                         6         162      1087.9       10.72         129      1161.7       10.09
+
+
+  23  calc see2=2*se2
+  24  dtable [meth=bar] mean2;bar=see2
+  25
+  26  "Dla linii MP"
+  27  restrict names[];cond=pop.in.!(2)
+  28  vcomp [fix = row*shape]
+  29  reml [p=mod,Wald,mean,eff,comp] trait
+
+29......................................................................................................................................................................................................
+
+
+REML variance components analysis
+=================================
+
+Response variate:  trait
+Fixed model:       Constant + row + shape + row.shape
+Number of units:   171
+
+Residual term has been added to model
+
+Sparse algorithm with AI optimisation
+Analysis is subject to the restriction on trait
+
+
+Residual variance model
+-----------------------
+
+Term             Factor        Model(order)  Parameter        Estimate      s.e.
+Residual                       Identity      Sigma2             22148.     2424.
+
+
+Tests for fixed effects
+-----------------------
+
+Sequentially adding terms to fixed model
+
+Fixed term                 Wald statistic  n.d.f.   F statistic  d.d.f.    F pr
+row                                731.97       1        731.97   167.0  <0.001
+shape                               16.32       1         16.32   167.0  <0.001
+row.shape                            0.67       1          0.67   167.0   0.415
+
+Dropping individual terms from full fixed model
+
+Fixed term                 Wald statistic  n.d.f.   F statistic  d.d.f.    F pr
+row.shape                            0.67       1          0.67   167.0   0.415
+
+* MESSAGE: denominator degrees of freedom for approximate F-tests are calculated using algebraic derivatives ignoring fixed/boundary/singular variance parameters.
+
+
+
+Table of effects for Constant
+-----------------------------
+
+            466.7    Standard error: 22.96
+
+
+Table of effects for row
+------------------------
+
+
+row        2        6
+         0.0    638.7
+
+
+Standard error of differences: 30.62
+
+
+Table of effects for shape
+--------------------------
+
+
+shape        r        w
+          0.00   113.01
+
+
+Standard error of differences: 33.80
+
+
+Table of effects for row.shape
+------------------------------
+
+
+        shape        r        w
+          row
+            2    0.000    0.000
+            6    0.000  -37.647
+
+
+Standard error of differences: 46.05
+
+
+Table of predicted means for Constant
+-------------------------------------
+
+            833.2    Standard error:   11.51
+
+
+Table of predicted means for row
+--------------------------------
+
+
+row        2        6
+       523.2   1143.2
+
+
+Standard error of differences: 23.02
+
+
+Table of predicted means for shape
+----------------------------------
+
+
+shape        r        w
+         786.1    880.3
+
+
+Standard error of differences: 23.02
+
+
+Table of predicted means for row.shape
+--------------------------------------
+
+
+        shape        r        w
+          row
+            2    466.7    579.8
+            6   1105.5   1180.8
+
+
+Standard errors of differences
+
+Average:           32.53
+Maximum:           34.40
+Minimum:           30.62
+
+Average variance of differences: 1060.
+
+Standard error of differences for same level of factor:
+
+                    row       shape
+Average:          32.54       32.51
+Maximum:          33.80       34.40
+Minimum:          31.27       30.62
+Average variance of differences:
+            1060.       1060.
+
+  30  restrict names[]
+  31
+  32  "Dla linii MPS"
+  33  restrict names[];cond=pop.in.!(3)
+  34  vcomp [fix = row*shape]
+  35  reml [p=mod,Wald,mean,eff,comp] trait
+
+35......................................................................................................................................................................................................
+
+
+REML variance components analysis
+=================================
+
+Response variate:  trait
+Fixed model:       Constant + row + shape + row.shape
+Number of units:   573
+
+Residual term has been added to model
+
+Sparse algorithm with AI optimisation
+Analysis is subject to the restriction on trait
+
+
+Residual variance model
+-----------------------
+
+Term             Factor        Model(order)  Parameter        Estimate      s.e.
+Residual                       Identity      Sigma2             12988.      770.
+
+
+Tests for fixed effects
+-----------------------
+
+Sequentially adding terms to fixed model
+
+Fixed term                 Wald statistic  n.d.f.   F statistic  d.d.f.    F pr
+row                               4605.31       1       4605.31   569.0  <0.001
+shape                               24.11       1         24.11   569.0  <0.001
+row.shape                            7.79       1          7.79   569.0   0.005
+
+Dropping individual terms from full fixed model
+
+Fixed term                 Wald statistic  n.d.f.   F statistic  d.d.f.    F pr
+row.shape                            7.79       1          7.79   569.0   0.005
+
+* MESSAGE: denominator degrees of freedom for approximate F-tests are calculated using algebraic derivatives ignoring fixed/boundary/singular variance parameters.
+
+
+
+Table of effects for Constant
+-----------------------------
+
+            461.9    Standard error: 11.45
+
+
+Table of effects for row
+------------------------
+
+
+row        2        6
+         0.0    626.0
+
+
+Standard error of differences: 14.54
+
+
+Table of effects for shape
+--------------------------
+
+
+shape        r        w
+         0.000   19.142
+
+
+Standard error of differences: 14.22
+
+
+Table of effects for row.shape
+------------------------------
+
+
+        shape        r        w
+          row
+            2     0.00     0.00
+            6     0.00    54.63
+
+
+Standard error of differences: 19.57
+
+
+Table of predicted means for Constant
+-------------------------------------
+
+            798.1    Standard error:    4.89
+
+
+Table of predicted means for row
+--------------------------------
+
+
+row        2        6
+       471.5   1124.8
+
+
+Standard error of differences: 9.785
+
+
+Table of predicted means for shape
+----------------------------------
+
+
+shape        r        w
+         774.9    821.4
+
+
+Standard error of differences: 9.785
+
+
+Table of predicted means for row.shape
+--------------------------------------
+
+
+        shape        r        w
+          row
+            2    461.9    481.1
+            6   1087.9   1161.7
+
+
+Standard errors of differences
+
+Average:           13.80
+Maximum:           15.23
+Minimum:           12.29
+
+Average variance of differences: 191.5
+
+Standard error of differences for same level of factor:
+
+                    row       shape
+Average:          13.83       13.82
+Maximum:          14.22       14.54
+Minimum:          13.45       13.10
+Average variance of differences:
+            191.5       191.5
+
+  36
+  37
+  38  stop
+
+********* End of job. Current data space: 16 blocks, peak usage 51% at line 35.
+
+GenStat Release 15.1  (PC/Windows XP)             22 October 2013 07:31:00
+Copyright 2012, VSN International Ltd.
+Registered to: Institute of Plant Genetics
+
