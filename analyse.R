@@ -1,27 +1,41 @@
-d <- read.table("data2.txt", header=T, sep="\t", stringsAsFactors=F)
-d$powt <- factor(d$powt)
-d$population <- factor(d$population)
-d$genotyp <- factor(d$genotyp)
-d$rwness <- factor(d$rwness)
-d$shape <- factor(d$shape)
+load.data <- function() {
+  
+  d <- read.table("data2.txt", header=T, sep="\t", stringsAsFactors=F)
+  d$powt <- factor(d$powt)
+  d$population <- factor(d$population)
+  d$genotyp <- factor(d$genotyp)
+  d$rwness <- factor(d$rwness)
+  d$shape <- factor(d$shape)
+  d <<- cbind(d, label=paste(d[,3],d[,18],d[,19], sep=":"))
+}
 
-d <- cbind(d, label=paste(d[,3],d[,18],d[,19], sep=":"))
+generate.name.table <- function() {
 
+  u <- unique(d[,c(3,18,19)])
+  u <- u[order(u[,1], u[,2], u[,3]),]
+  u <- cbind(u, label=paste(u[,1], u[,2], u[,3], sep=":"))
+  u <- cbind(u, labels=paste(u[,1], u[,2], u[,3], sep=":"))
+  levels(u$labels)[1] <- "MARESI"
+  levels(u$labels)[10] <- "POMO"
+  u <<- u
+}
 
-u <- unique(d[,c(3,18,19)])
-u <- u[order(u[,1], u[,2], u[,3]),]
-u <- cbind(u, label=paste(u[,1], u[,2], u[,3], sep=":"))
-u <- cbind(u, labels=paste(u[,1], u[,2], u[,3], sep=":"))
-levels(u$labels)[1] <- "MARESI"
-levels(u$labels)[10] <- "POMO"
 
 # Visualisation of data points
-old.par <- par(mfrow=c(4, 4))
-for (i in 5:17) {
-  plot(y=d[,i], x=d$label, main=names(d)[i], las=2, at=c(1, 3,4,5,6, 8,9,10,11, 13), col=c("indianred","olivedrab")[u$shape], names=u$labels)
-  #mtext("Population", side = 1, line = 5)
+visualise.data <- function() {
+
+  old.par <- par(mfrow=c(4, 4))
+  for (i in 5:17) {
+    plot(y=d[,i], x=d$label, main=names(d)[i], las=2, at=c(1, 3,4,5,6, 8,9,10,11, 13), col=c("indianred","olivedrab")[u$shape], names=u$labels)
+    #mtext("Population", side = 1, line = 5)
+  }
+  par(old.par)
+  
 }
-par(old.par)
+
+load.data()
+generate.name.table()
+visualise.data()
 
 stderr <- function(x) sqrt(var(x)/length(x))
 
@@ -48,7 +62,8 @@ error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
 }
 library(gplots)
 
-# For parents:
+
+# Print means for parents:
 t <- means.p
 te <- ses.p
 old.par <- par(mfrow=c(4, 4))
@@ -61,7 +76,7 @@ for (i in 4:16) {
 par(old.par)
 
 
-# For children:
+# Print means for children:
 t <- means.c
 te <- ses.c
 old.par <- par(mfrow=c(4, 4))
@@ -82,16 +97,61 @@ par(old.par)
 d.mp <- d[d$population=="MP",]
 d.mps <- d[d$population=="MPS",]
 
-dd <- d.mp
+for (dd in list(d.mp, d.mps)) {
+  i = 6
+  library(lme4)
+  formula <- paste(names(dd)[i], "~rwness*shape+(1|powt)", sep="")
+  m <- lmer(formula, dd)
+  
+  dat <- with(dd, expand.grid(shape=unique(shape), rwness=unique(rwness)))
+  dat$preNA2 <- predict(m, dat, REform=NA)
+  print(dat)
+  
+  datR <- with(dd, expand.grid(shape=unique(shape), rwness=unique(rwness), powt=unique(powt)))
+  datR$prePowt <- predict(m, datR, REform=~(1|powt))
+  datR$preNA <- predict(m, datR, REform=NA)
+  datR$preNULL <- predict(m, datR, REform=NULL)
+  print(datR)
+  
+  dat2 <- with(dd, expand.grid(shape=unique(shape), rwness=unique(powt)))
+  dat2 <- with(dd, expand.grid(shape=unique(shape), powt=unique(powt), rwness=unique(rwness)))
+  dat2$preNA <- predict(m, dat2, REform=~(1|powt))
+  print(dat2)
+  
+  print("-------")
+}
+
+
+
+dd <- d.mps
 i = 6
 library(lme4)
 formula <- paste(names(dd)[i], "~rwness*shape+(1|powt)", sep="")
 lmer(formula, dd)
 
+coef(summary(m))
 
 
 
+x <- unique(getME(model, "X"))
+est <- x %*% fixef(model)
+est.cov <- x %*% vcov(model) %*% t(x)
 
+
+data(Orthodont, package="MEMSS")
+newdat <- expand.grid(age=c(8,10,12,14), Sex=c("Male","Female"), distance = 0)
+fm1 = lmer(formula = distance ~ age*Sex + (age|Subject), data = Orthodont)
+mm = model.matrix(terms(fm1),newdat)
+newdat$distance = mm %*% fixef(fm1)
+pvar1 <- diag(mm %*% tcrossprod(vcov(fm1),mm))
+tvar1 <- pvar1+VarCorr(fm1)$Subject[1]
+newdat2 <- data.frame(newdat, 
+                      plo = newdat$distance-2*sqrt(pvar1), 
+                      phi = newdat$distance+2*sqrt(pvar1), 
+                      tlo = newdat$distance-2*sqrt(tvar1),
+                      thi = newdat$distance+2*sqrt(tvar1))
+
+newdat2$pred <- predict(fm1, newdat2, distance=0)
 
 
 
