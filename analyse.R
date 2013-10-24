@@ -42,8 +42,26 @@ stderr <- function(x) sqrt(var(x)/length(x))
 means.lines <- aggregate(d[5:17], list(Line=d$genotyp), mean)
 ses.lines <- aggregate(d[5:17], list(Line=d$genotyp), stderr)
 
+ms.lines <- data.frame(line=means.lines[,1])
+for (i in 2:14) {
+  ms.lines <- cbind(ms.lines, means.lines[,i], ses.lines[,i])
+  colnames(ms.lines)[2*i-2] <- names(means.lines)[i]
+  colnames(ms.lines)[2*i-1] <- paste(names(means.lines)[i], "(se)", sep="")
+}
+write.table(format(ms.lines, digits=3, nsmall=2), file="out/means.lines.txt", sep="\t", quote=F)
+
 means <- aggregate(d[5:17], list(Shape=d$shape, Rwness=d$rwness, Pop=d$population), mean)
 ses <- aggregate(d[5:17], list(Shape=d$shape, Rwness=d$rwness, Pop=d$population), stderr)
+
+ms <- means[,1:3]
+for (i in 4:16) {
+  ms <- cbind(ms, means[,i], ses[,i])
+  colnames(ms)[2*i-4] <- names(means)[i]
+  colnames(ms)[2*i-3] <- paste(names(means)[i], "(se)", sep="")
+}
+write.table(format(ms, digits=3, nsmall=2), file="out/means.factors.txt", sep="\t", quote=F)
+
+
 
 means.p <- means[c(1,10),]
 means.p$Pop <- factor(means.p$Pop)
@@ -94,113 +112,223 @@ for (i in 4:16) {
 par(old.par)
 
 
-d.mp <- d[d$population=="MP",]
-d.mps <- d[d$population=="MPS",]
+library(lme4)
 
-for (dd in list(d.mp, d.mps)) {
-  i = 6
-  library(lme4)
-  formula <- paste(names(dd)[i], "~rwness*shape+(1|powt)", sep="")
-  m <- lmer(formula, dd)
+for (j in c("MP", "MPS")) {
   
-  dat <- with(dd, expand.grid(shape=unique(shape), rwness=unique(rwness)))
-  dat$preNA2 <- predict(m, dat, REform=NA)
-  print(dat)
+  dd <- d[d$population==j,]
   
-  datR <- with(dd, expand.grid(shape=unique(shape), rwness=unique(rwness), powt=unique(powt)))
-  datR$prePowt <- predict(m, datR, REform=~(1|powt))
-  datR$preNA <- predict(m, datR, REform=NA)
-  datR$preNULL <- predict(m, datR, REform=NULL)
-  print(datR)
+  loopname <- paste("\n\n ----- ", j, " ----- \n", sep="")
+  write(loopname, file="out/means.txt", append=T)
+  write(loopname, file="out/means_random.txt", append=T)
   
-  dat2 <- with(dd, expand.grid(shape=unique(shape), rwness=unique(powt)))
-  dat2 <- with(dd, expand.grid(shape=unique(shape), powt=unique(powt), rwness=unique(rwness)))
-  dat2$preNA <- predict(m, dat2, REform=~(1|powt))
-  print(dat2)
+  for (i in 5:17) {
+    
+    trait <- names(dd)[i]
+    loopname <- paste("\n\n", j, " : ", trait, "\n", sep="")
+    fname <- paste("out/", j, "_", trait, ".txt", sep="")
+    print(loopname)
+    write(loopname, file="out/means.txt", append=T)
+    write(loopname, file="out/means_random.txt", append=T)
+    
+    formula <- paste(trait, "~rwness*shape+(1|powt)", sep="")
+    m <- lmer(formula, dd)
+    c <- coef(summary(m))
+    a <- anova(m)
+    a$Fpr <- 1 - pf(a[,4], 1, dim(m@frame)[1])
+    
+    
+    errorVar <- attr(VarCorr(m), "sc")^2
+    randomVar <- VarCorr(m)[["powt"]][1]
+    
+    dat <- with(dd, expand.grid(shape=unique(shape), rwness=unique(rwness)))
+    dat[trait] <- predict(m, dat, REform=NA)
+    
+    ef <- model.matrix(~shape, dat)
+    ef[,1] <- ef[,1] - ef[,2]
+    means <- solve(t(ef) %*% ef) %*% t(ef) %*% dat[,trait]
+    mean.shape <- cbind(shape=levels(dat$shape), means)
+    colnames(mean.shape)[2] <- trait
   
-  print("-------")
+    ef <- model.matrix(~rwness, dat)
+    ef[,1] <- ef[,1] - ef[,2]
+    means <- solve(t(ef) %*% ef) %*% t(ef) %*% dat[,trait]
+    mean.rwness <- cbind(rwness=levels(dat$rwness), means)
+    colnames(mean.rwness)[2] <- trait
+    
+    datR <- with(dd, expand.grid(shape=unique(shape), rwness=unique(rwness), powt=unique(powt)))
+    datR[trait] <- predict(m, datR, REform=NA) #same values for diff powt
+    datR$plusRandom <- predict(m, datR, REform=~(1|powt)) #diff values for diff powt
+    #datR$preNULL <- predict(m, datR, REform=NULL) #diff values for diff powt
+    #print(datR)
+    
+    write.table( format(dat, digits=4, nsmall=2), file="out/means.txt", append=T, quote=F, row.names=F, sep="\t")
+    write.table(format(datR, digits=4, nsmall=2), file="out/means_random.txt", append=T, quote=F, row.names=F, sep="\t")
+    
+    write.table( round(a, digits=3), file=fname, quote=F, sep="\t")
+    write("\n", file=fname, append=T)
+    write.table( round(c, digits=3), file=fname, append=T, quote=F, sep="\t")
+    write("\n", file=fname, append=T)
+    write(paste("Error variance: ", errorVar, "\n"), file=fname, append=T)
+    write(paste("Random effect (powt) variance: ", randomVar, "\n"), file=fname, append=T)
+    write.table( format(mean.shape, digits=4, nsmall=2), file=fname, append=T, quote=F, row.names=F, sep="\t")
+    write("\n", file=fname, append=T)
+    write.table( format(mean.rwness, digits=4, nsmall=2), file=fname, append=T, quote=F, row.names=F, sep="\t")
+    write("\n", file=fname, append=T)
+    write.table( format(dat, digits=4, nsmall=2), file=fname, append=T, quote=F, row.names=F, sep="\t")
+    write("\n", file=fname, append=T)
+    write.table(format(datR, digits=4, nsmall=2), file=fname, append=T, quote=F, row.names=F, sep="\t")    
+    write("\n", file=fname, append=T)
+  }
+  
 }
 
+analysis.for.populations <- function() {
+  
+  dd <- d[grep(d$population, pattern="MP"),]
+  for (i in 5:17) {
+    
+    trait <- names(dd)[i]
+    formula <- paste(trait, "~population*rwness*shape+(1|powt)", sep="")
+    m <- lmer(formula, dd)
+    c <- coef(summary(m))
+    a <- anova(m)
+    a$Fpr <- 1 - pf(a[,4], 1, dim(m@frame)[1])
+   
+    errorVar <- attr(VarCorr(m), "sc")^2
+    randomVar <- VarCorr(m)[["powt"]][1]
+    
+    fname <- paste("out/", "all_", trait, ".txt", sep="")
+    write.table( round(a, digits=3), file=fname, quote=F, sep="\t")
+    write("\n", file=fname, append=T)
+    write.table( round(c, digits=3), file=fname, append=T, quote=F, sep="\t")
+    write("\n", file=fname, append=T)
+    write(paste("Error variance: ", errorVar, "\n"), file=fname, append=T)
+    write(paste("Random effect (powt) variance: ", randomVar, "\n"), file=fname, append=T)
+    
+    write(trait, file="out/all.txt", append=T)
+    write.table( format(a, digits=3, nsmall=2), file="out/all.txt", append=T, quote=F, sep="\t")
+    write("\n\n", file="out/all.txt", append=T)
+    
+    write(trait, file="out/all_c.txt", append=T)
+    write.table( format(c, digits=3, nsmall=2), file="out/all_c.txt", append=T, quote=F, sep="\t")
+    write("\n", file="out/all_c.txt", append=T)
+    
+    
+    
+    dat <- with(dd, expand.grid(population=unique(population), shape=unique(shape), rwness=unique(rwness)), powt=unique(powt))
+    dat[trait] <- predict(m, dat, REform=NA)
+    
+    ef <- model.matrix(~shape, dat)
+    ef[,1] <- ef[,1] - ef[,2]
+    means <- solve(t(ef) %*% ef) %*% t(ef) %*% dat[,trait]
+    mean.shape <- cbind(shape=levels(dat$shape), means)
+    colnames(mean.shape)[2] <- trait
+    
+    ef <- model.matrix(~rwness, dat)
+    ef[,1] <- ef[,1] - ef[,2]
+    means <- solve(t(ef) %*% ef) %*% t(ef) %*% dat[,trait]
+    mean.rwness <- cbind(rwness=levels(dat$rwness), means)
+    colnames(mean.rwness)[2] <- trait
+    
+    datR <- with(dd, expand.grid(shape=unique(shape), rwness=unique(rwness), powt=unique(powt)))
+    datR[trait] <- predict(m, datR, REform=NA) #same values for diff powt
+    datR$plusRandom <- predict(m, datR, REform=~(1|powt)) #diff values for diff powt
+    #datR$preNULL <- predict(m, datR, REform=NULL) #diff values for diff powt
+    #print(datR)
+    
+    write.table( format(dat, digits=4, nsmall=2), file="out/means.txt", append=T, quote=F, row.names=F, sep="\t")
+    write.table(format(datR, digits=4, nsmall=2), file="out/means_random.txt", append=T, quote=F, row.names=F, sep="\t")
+    
+  }
+  
+}
+
+  
+
+calc.means.manually <- function() {
+  
+  nd <- with(dd, expand.grid(shape=unique(shape), rwness=unique(rwness), l.ziarn=0))
+  mm <- model.matrix(terms(m),nd)
+  nd$l.ziarn <- mm %*% fixef(m)
+  
+  pvar1 <- diag(mm %*% tcrossprod(vcov(m),mm))
+  tvar1 <- pvar1+VarCorr(m)$powt[1]  ## must be adapted for more complex models
+  nd <- data.frame(nd
+    , plo = nd$l.ziarn-2*sqrt(pvar1), phi = nd$l.ziarn+2*sqrt(pvar1)
+    , tlo = nd$l.ziarn-2*sqrt(tvar1), thi = nd$l.ziarn+2*sqrt(tvar1)
+  )
+  
+  library(ggplot2) # Plotting
+  #plot confidence
+  g0 <- ggplot(nd, aes(x=shape, y=l.ziarn, colour=rwness))+geom_point()
+  g0 + geom_errorbar(aes(ymin = plo, ymax = phi))+
+    labs(title="CI based on fixed-effects uncertainty ONLY")
+  #plot prediction
+  g0 + geom_errorbar(aes(ymin = tlo, ymax = thi))+
+    ggtitle("CI based on FE uncertainty + RE variance")
+}
+
+nd <- with(dd, expand.grid(shape=unique(shape), rwness=unique(rwness), l.ziarn=0))
+mm <- model.matrix(terms(m),nd)
+nd$l.ziarn <- mm %*% fixef(m)
 
 
-dd <- d.mps
-i = 6
-library(lme4)
-formula <- paste(names(dd)[i], "~rwness*shape+(1|powt)", sep="")
-lmer(formula, dd)
-
-coef(summary(m))
 
 
-
-x <- unique(getME(model, "X"))
-est <- x %*% fixef(model)
-est.cov <- x %*% vcov(model) %*% t(x)
-
-
-data(Orthodont, package="MEMSS")
-newdat <- expand.grid(age=c(8,10,12,14), Sex=c("Male","Female"), distance = 0)
-fm1 = lmer(formula = distance ~ age*Sex + (age|Subject), data = Orthodont)
-mm = model.matrix(terms(fm1),newdat)
-newdat$distance = mm %*% fixef(fm1)
-pvar1 <- diag(mm %*% tcrossprod(vcov(fm1),mm))
-tvar1 <- pvar1+VarCorr(fm1)$Subject[1]
-newdat2 <- data.frame(newdat, 
-                      plo = newdat$distance-2*sqrt(pvar1), 
-                      phi = newdat$distance+2*sqrt(pvar1), 
-                      tlo = newdat$distance-2*sqrt(tvar1),
-                      thi = newdat$distance+2*sqrt(tvar1))
-
-newdat2$pred <- predict(fm1, newdat2, distance=0)
+data("Orthodont",package="MEMSS")
+fm1 <- lmer(
+  formula = distance ~ age*Sex + (age|Subject)
+  , data = Orthodont
+)
+newdat <- expand.grid(
+  age=c(8,10,12,14)
+  , Sex=c("Male","Female")
+  , distance = 0
+)
 
 
+dd <- data.frame(a = gl(3,4), b = gl(4,1,12)) # balanced 2-way
+options("contrasts")
+mm1 <- model.matrix(~ a + b, dd)
+mm2 <- model.matrix(~ a + b, dd, contrasts = list(a = "contr.sum"))
+mm3 <- model.matrix(~ a + b, dd, contrasts = list(a = "contr.sum", b = "contr.poly"))
+m.orth <- model.matrix(~a+b, dd, contrasts = list(a = "contr.helmert"))
+crossprod(m.orth) # m.orth is  ALMOST  orthogonal
+
+#contrasts test
+{
+utils::example(factor)
+fff <- ff[, drop = TRUE]  # reduce to 5 levels.
+contrasts(fff) # treatment contrasts by default
+contrasts(C(fff, sum))
+contrasts(fff, contrasts = FALSE) # the 5x5 identity matrix
+
+contrasts(fff) <- contr.sum(5); contrasts(fff)  # set sum contrasts
+contrasts(fff, 2) <- contr.sum(5); contrasts(fff)  # set 2 contrasts
+# supply 2 contrasts, compute 2 more to make full set of 4.
+contrasts(fff) <- contr.sum(5)[, 1:2]; contrasts(fff)
+
+## using sparse contrasts: % useful, once model.matrix() works with these :
+ffs <- fff
+contrasts(ffs) <- contr.sum(5, sparse = TRUE)[, 1:2]; contrasts(ffs)
+stopifnot(all.equal(ffs, fff))
+contrasts(ffs) <- contr.sum(5, sparse = TRUE); contrasts(ffs)
+}
+
+x <- unique(getME(m, "X"))
+est <- x %*% fixef(m)
+est.cov <- x %*% vcov(m) %*% t(x)
+
+xf <- model.matrix(~shape, dd)
+xf[,1] <- xf[,1] - xf[,2]
+xf
+
+ms <- solve(t(xf) %*% xf) %*% t(xf)
+means <- ms %*% est
 
 
 
-
-
-
-
-Age = c(50, 55, 60, 65, 70)                                     # Age groups  
-Male = c(15.4, 24.3, 37.0, 54.6, 71.1)                          # Death rates for males  
-Female = c(8.4, 13.6, 19.3, 35.1, 50.0)                         # Death rates for females  
-Deathrate = matrix(c(Male,Female), nrow=length(Age), ncol=2, dimnames=list(Age, c("Male","Female")))         
-Deathrate2 = t(Deathrate)                                       # Transpose the Deathrate matrix  
-
-barplot(Deathrate2,                             # Data (bar heights) to plot  
-        beside=TRUE,                            # Plot the bars beside one another; default is to plot stacked bars  
-        space=c(0.2,0.8),                       # Amount of space between i) bars within a group, ii) bars between groups  
-        names.arg=c("65-69", "60-64", "55-59", "50-54", "70-74"),    #Names for the bars  
-        col=c("blue", "red"),                   # Color of the bars  
-        border="black",                         # Color of the bar borders  
-        main=c("Death rates in Virginia"),      # Main title for the plot  
-        xlab="Age group",                       # X-axis label  
-        ylab="Death rate",                      # Y-axis label  
-        font.lab=2)    
-
-legend("topleft",                               # Add a legend to the plot  
-       legend=c("Male", "Female"),             # Text for the legend  
-       fill=c("blue", "red"))                  # Fill for boxes of the legend  
 
 
 library(gplots)   # Load the gplots graphics library  
-
-# Generate (fake) confidence intervals (CI should be derived from the underlying data)  
-cil <- Deathrate2 * 0.85  
-ciu <- Deathrate2 * 1.15  
-
-barplot2(Deathrate2,                            # Data (bar heights) to plot  
-          beside=TRUE,                            # Plot the bars beside one another; default is to plot stacked bars  
-          space=c(0.2,0.8),                       # Amount of space between i) bars within a group, ii) bars between groups  
-          names.arg=c("65-69", "60-64", "55-59", "50-54", "70-74"),    #Names for the bars  
-          col=c("blue", "red"),                   # Color of the bars  
-          border="black",                         # Color of the bar borders  
-          main=c("Death rates in Virginia"),      # Main title for the plot  
-          xlab="Age group",                       # X-axis label  
-          ylab="Death rate",                      # Y-axis label  
-          font.lab=2,                             # Font to use for the axis labels: 1=plain text, 2=bold, 3=italic, 4=bold italic  
-          plot.ci=TRUE,                           # Plot confidence intervals  
-          ci.l=cil,                               # Lower values for the confidence interval  
-          ci.u=ciu,                               # Upper values for the confidence interval  
-          plot.grid=TRUE) 
-             
